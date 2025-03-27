@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class Controller
 {
@@ -15,7 +16,7 @@ abstract class Controller
             'status' => 'success',
             'message' => $message,
             'data' => $data
-        ], 200);
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -27,13 +28,13 @@ abstract class Controller
             'status' => 'success',
             'message' => $message,
             'data' => $data
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     /**
      * Return an error response with custom status code.
      */
-    protected function responseError(string $message, int $statusCode = 400, $errors = null): JsonResponse
+    protected function responseError(string $message, int $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR, $errors = null): JsonResponse
     {
         return response()->json([
             'status' => 'error',
@@ -47,7 +48,15 @@ abstract class Controller
      */
     protected function responseNotFound(string $message = 'Data not found'): JsonResponse
     {
-        return $this->responseError($message, 404);
+        return $this->responseError($message, Response::HTTP_NOT_FOUND);
+    }
+
+    /**
+     * Return a not found response (422 Unprocess Equest).
+     */
+    protected function validationError($data): JsonResponse
+    {
+        return $this->responseError("Unprocessable Content", Response::HTTP_UNPROCESSABLE_ENTITY, $data);
     }
 
     /**
@@ -55,6 +64,6 @@ abstract class Controller
      */
     protected function responseUnauthorized(string $message = 'Unauthorized access'): JsonResponse
     {
-        return $this->responseError($message, 401);
+        return $this->responseError($message, Response::HTTP_UNAUTHORIZED);
     }
 }
