@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    public function unauthorized()
+    {
+        return $this->responseUnauthorized();
+    }
+
     public function register(Request $request)
     {
         // Set validation rules
