@@ -101,11 +101,17 @@ class Game extends Model
         // Ambil semua organ_id yang tersedia
         $allOrganIds = Organ::pluck('id');
 
-        // Ambil game yang sudah selesai (player_win != null) dan melibatkan user ini
+        // Ambil game yang sudah selesai dan memenuhi aturan player_win
         $userLevels = self::whereNotNull('player_win')
             ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->orWhere('opponent_id', $userId);
+                $query->where(function ($q) use ($userId) {
+                    $q->where('user_id', $userId)
+                      ->where('player_win', true); // Jika user adalah pemain utama, harus menang
+                })
+                ->orWhere(function ($q) use ($userId) {
+                    $q->where('opponent_id', $userId)
+                      ->where('player_win', false); // Jika user adalah lawan, harus kalah
+                });
             })
             ->get()
             ->groupBy('organ_id')
