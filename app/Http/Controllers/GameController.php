@@ -26,7 +26,7 @@ class GameController extends Controller
             $waitingGame->updateGame(['opponent_id' => $user->id]);
 
             $message = json_encode($waitingGame);
-            $topic = 'organspedia' . $waitingGame->id;
+            $topic = 'organspedia_' . $waitingGame->id;
             MQTT::publish($topic, $message);
 
             return $this->responseSuccess('Join Game successful!', $waitingGame);

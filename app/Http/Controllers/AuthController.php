@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Game;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +21,18 @@ class AuthController extends Controller
         // Set validation rules
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
         // If validation fails
         if ($validator->fails()) {
             return $this->validationError($validator->errors());
+        }
+
+        $checkEmail = User::getByEmail($request->email);
+        if ($checkEmail) {
+            return $this->responseError("Email yang dipakai sudah pernah digunakan", 422);
         }
 
         // Create user
@@ -60,18 +66,17 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return $this->responseUnauthorized('Invalid email or password!');
+            return $this->responseUnauthorized('email dan password tidak sesuai!');
         }
 
         if (Hash::check($request->password, $user->password)) {
             $token = $user->createToken(env('APP_KEY'))->accessToken;
 
             return $this->responseSuccess('Login successful', [
-                'user' => $user,
                 'token' => $token
             ]);
         }
 
-        return $this->responseUnauthorized('Invalid email or password!');
+        return $this->responseUnauthorized('email dan password tidak sesuai!');
     }
 }

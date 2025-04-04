@@ -7,7 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder|User load(string|array $relations)
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -42,4 +44,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public static function getByEmail(string $email): ?self
+    {
+        return self::where('email', $email)->first();
+    }
+
+    public function gamesAsPlayer()
+    {
+        return $this->hasMany(Game::class, 'user_id');
+    }
+
+    public function gamesAsOpponent()
+    {
+        return $this->hasMany(Game::class, 'opponent_id');
+    }
 }

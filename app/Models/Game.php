@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use function Illuminate\Log\log;
+
 class Game extends Model
 {
     use HasFactory;
@@ -52,7 +54,7 @@ class Game extends Model
     public static function findWaitingSelf(int $userId): ?self
     {
         return self::whereNull('opponent_id')
-            ->where('user_id', '==', $userId)
+            ->where('user_id', $userId)
             ->first();
     }
 
@@ -89,5 +91,31 @@ class Game extends Model
     public static function getGameById(int $id): ?self
     {
         return self::find($id);
+    }
+
+    /**
+     * Level tertinggi by user.
+     */
+    public static function getHighestLevelsForUser(int $userId)
+    {
+        // Ambil semua organ_id yang tersedia
+        $allOrganIds = Organ::pluck('id');
+
+        // Ambil game yang sudah selesai (player_win != null) dan melibatkan user ini
+        $userLevels = self::whereNotNull('player_win')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhere('opponent_id', $userId);
+            })
+            ->get()
+            ->groupBy('organ_id')
+            ->mapWithKeys(function ($games, $organId) {
+                return [$organId => $games->max('level') ?? 0];
+            });
+
+        // Pastikan semua organ_id tetap muncul, kalau belum ada game-nya maka 0
+        return $allOrganIds->mapWithKeys(function ($organId) use ($userLevels) {
+            return [$organId => $userLevels[$organId] ?? 0];
+        });
     }
 }

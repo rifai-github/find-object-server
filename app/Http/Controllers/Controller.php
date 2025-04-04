@@ -46,7 +46,7 @@ abstract class Controller
     /**
      * Return a not found response (404 Not Found).
      */
-    protected function responseNotFound(string $message = 'Data not found'): JsonResponse
+    protected function responseNotFound(string $message = 'Data tidak ditemukan'): JsonResponse
     {
         return $this->responseError($message, Response::HTTP_NOT_FOUND);
     }
@@ -56,7 +56,7 @@ abstract class Controller
      */
     protected function validationError($data): JsonResponse
     {
-        return $this->responseError("Unprocessable Content", Response::HTTP_UNPROCESSABLE_ENTITY, $data);
+        return $this->responseError("Kesalahan Request", Response::HTTP_UNPROCESSABLE_ENTITY, $data);
     }
 
     /**
