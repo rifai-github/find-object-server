@@ -78,9 +78,11 @@ class Game extends Model
     {
         return self::create([
             'user_id' => $userId,
+            'opponent_id' => null,
             'organ_id' => $organId,
             'level' => $level,
             'seed' => random_int(1, 999999),
+            'player_win' => null,
             'time_second' => 0,
         ]);
     }
@@ -106,11 +108,11 @@ class Game extends Model
             ->where(function ($query) use ($userId) {
                 $query->where(function ($q) use ($userId) {
                     $q->where('user_id', $userId)
-                      ->where('player_win', true); // Jika user adalah pemain utama, harus menang
+                      ->where('player_win', true); // Jika user adalah pemain utama, maka pemain utama harus menang
                 })
                 ->orWhere(function ($q) use ($userId) {
                     $q->where('opponent_id', $userId)
-                      ->where('player_win', false); // Jika user adalah lawan, harus kalah
+                      ->where('player_win', false); // Jika user adalah lawan, maka pemain utama harus kalah
                 });
             })
             ->get()
